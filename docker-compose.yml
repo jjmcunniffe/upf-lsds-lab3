@@ -1,0 +1,12 @@
+version: '3'
+services:
+  app:
+    build: .
+    command: tail -F anything
+    volumes:
+      - data:/app
+      - ./target:/app/target
+      - ./src/main/resources:/app/config
+      - ./out:/app/out
+volumes:
+  data:
