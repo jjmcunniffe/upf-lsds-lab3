@@ -25,3 +25,6 @@ hs_err_pid*
 # IDE and MacOS.
 .DS_Store
 .idea/*
+
+# Project-specific.
+application.properties
