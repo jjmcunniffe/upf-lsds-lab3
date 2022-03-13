@@ -6,7 +6,5 @@ services:
     volumes:
       - data:/app
       - ./target:/app/dist/target
-      - ./src/main/resources:/app/dist/config
-      - ./tmp:/app/dist/tmp
 volumes:
   data:
