@@ -5,6 +5,7 @@ CONTAINER_ID=0
 if [ $# -eq 0 ]
   then
     echo "Please specify a Docker container ID."
+    docker ps
     read -r CONTAINER_ID
   else
     CONTAINER_ID=$1

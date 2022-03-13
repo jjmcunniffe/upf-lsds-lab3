@@ -2,10 +2,27 @@ package upf.edu.util;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.PairFunction;
+import scala.Tuple2;
+
+import java.util.Arrays;
 
 public class LanguageMapUtils {
 
+    private static PairFunction<String, String, String> parseTSV = (line) -> {
+        String[] fields = line.split("\t"); // Split by tab (.tsv).
+        // We only want fields [1] and [2]. We can discard [0] and [3].
+        return new Tuple2<String, String>(fields[1], fields[2]);
+    };
+
     public static JavaPairRDD<String, String> buildLanguageMap(JavaRDD<String> lines) {
-        return null;// IMPLEMENT ME
+        // Remove the header.
+        String header = lines.first();
+        JavaRDD<String> filteredLines = lines.filter(line -> !line.equals(header));
+
+        // Construct our pair with ISO 639-1 Code and English name.
+        JavaPairRDD<String, String> languages = filteredLines.mapToPair(parseTSV);
+
+        return languages;
     }
 }

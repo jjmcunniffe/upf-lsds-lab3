@@ -16,6 +16,7 @@ public class TwitterStreamingExample {
     public static void main(String[] args) throws InterruptedException, IOException {
         String propertiesFile = args[0];
         OAuthAuthorization auth = ConfigUtils.getAuthorizationFromFileProperties(propertiesFile);
+        System.out.println("Authed!");
 
         SparkConf conf = new SparkConf().setAppName("Real-time Twitter Example");
         JavaStreamingContext jsc = new JavaStreamingContext(conf, Durations.seconds(10));

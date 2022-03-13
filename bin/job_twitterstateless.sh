@@ -11,4 +11,4 @@ if [ $# -eq 0 ]
     CONTAINER_ID=$1
 fi
 
-docker exec -ti $CONTAINER_ID ./spark/bin/spark-shell local[4]
+docker exec -ti $CONTAINER_ID /app/spark/bin/spark-submit --class upf.edu.TwitterStateless --master local[4] /app/dist/target/lab3-1.0-SNAPSHOT.jar /app/dist/config/application.properties /app/dist/config/map.tsv
