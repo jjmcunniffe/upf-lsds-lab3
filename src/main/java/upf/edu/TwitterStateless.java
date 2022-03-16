@@ -42,6 +42,7 @@ public class TwitterStateless {
         final JavaPairRDD<String, String> languageMap = LanguageMapUtils
                 .buildLanguageMap(languageMapLines);
 
+        /*
         // Grab the different languages.
         JavaDStream<String> languages = stream.flatMap(new FlatMapFunction<Status, String>() {
             @Override
@@ -54,10 +55,8 @@ public class TwitterStateless {
                 .mapToPair(s -> new Tuple2<>(s, 1))
                 .reduceByKey((a, b) -> a + b);
 
-        /** TODO: Exchange language code for full language name. **/
         // Use the full language name by leveraging the language map RDD.
-        JavaPairDStream<String, Integer> formattedPair = pair;
-                /*
+        JavaPairDStream<String, Integer> formattedPair = pair
                 .transformToPair(
                         new Function<JavaPairRDD<String, Integer>, JavaPairRDD<String, Integer>>() {
                             @Override
@@ -66,8 +65,6 @@ public class TwitterStateless {
                             }
                         }
                 );
-                */
-        /** end TODO **/
 
         // Sort the pairs in decending order.
         JavaPairDStream<Integer, String> swappedPair = formattedPair.mapToPair(Tuple2::swap); // We swap before.
@@ -84,6 +81,7 @@ public class TwitterStateless {
 
         // Output the top ten language pairs.
         languageRankStream.print(10);
+        */
 
         // Start the application and wait for termination signal
         jsc.start();
