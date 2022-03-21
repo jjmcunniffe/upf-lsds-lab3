@@ -9,7 +9,6 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.twitter.TwitterUtils;
-import org.apache.spark.api.java.function.Function;
 import scala.Tuple2;
 import twitter4j.Status;
 import twitter4j.auth.OAuthAuthorization;
@@ -39,18 +38,15 @@ public class TwitterStateless {
         final JavaPairRDD<String, String> languageMap = LanguageMapUtils
                 .buildLanguageMap(languageMapLines);
 
-        // Get language codes from tweets.
-        JavaDStream<String> languages = stream
-                .flatMap(s -> Arrays.asList(s.getLang()).iterator());
-
         // Count the number of times a language code is present.
-        JavaPairDStream<String, Integer> languageRankStream = languages
+        JavaPairDStream<String, Integer> languageRankStream = stream
+                .flatMap(s -> Arrays.asList(s.getLang()).iterator())
                 .mapToPair(s -> new Tuple2<>(s, 1))
                 .reduceByKey((a, b) -> a + b)
                 // Join language map.
                 .transformToPair(s -> s.join(languageMap))
                 .mapToPair(s -> s._2()) // We want the second tuple.
-                // Sort by decending order.
+                // Sort by decending order and swap.
                 .transformToPair(s -> s.sortByKey(false))
                 .mapToPair(Tuple2::swap);
 

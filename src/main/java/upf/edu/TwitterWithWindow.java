@@ -8,12 +8,14 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.twitter.TwitterUtils;
+import scala.Tuple2;
 import twitter4j.Status;
 import twitter4j.auth.OAuthAuthorization;
 import upf.edu.util.ConfigUtils;
 import upf.edu.util.LanguageMapUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class TwitterWithWindow {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -35,17 +37,27 @@ public class TwitterWithWindow {
                 .buildLanguageMap(languageMapLines);
 
         // create an initial stream that counts language within the batch (as in the previous exercise)
-        final JavaPairDStream<String, Integer> languageCountStream = null; // IMPLEMENT ME
+        final JavaPairDStream<String, Integer> languageCountStream = stream
+                .flatMap(s -> Arrays.asList(s.getLang()).iterator())
+                .mapToPair(s -> new Tuple2<>(s, 1))
+                .reduceByKey((a, b) -> a + b)
+                // Join language map.
+                .transformToPair(s -> s.join(languageMap))
+                .mapToPair(s -> s._2()) // We want the joined tuple.
+                .mapToPair(Tuple2::swap);
 
         // Prepare output within the batch
-        final JavaPairDStream<Integer, String> languageBatchByCount = null; // IMPLEMENT ME
+        final JavaPairDStream<Integer, String> languageBatchByCount = languageCountStream
+                .mapToPair(Tuple2::swap)
+                .transformToPair(s -> s.sortByKey(false)); // Sort by decending order and swap.
 
         // Prepare output within the window
-        final JavaPairDStream<Integer, String> languageWindowByCount = null; // IMPLEMENT ME
+        final JavaPairDStream<Integer, String> languageWindowByCount = languageBatchByCount
+                .window(Durations.seconds(60)); // We update with the top tweet languages from the past minute.
 
         // Print first 15 results for each one
         languageBatchByCount.print(15);
-        languageWindowByCount.print(15);
+        languageWindowByCount.print(5);
 
         // Start the application and wait for termination signal
         jsc.start();
