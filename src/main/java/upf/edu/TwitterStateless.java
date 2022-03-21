@@ -15,12 +15,9 @@ import twitter4j.Status;
 import twitter4j.auth.OAuthAuthorization;
 import upf.edu.util.ConfigUtils;
 import upf.edu.util.LanguageMapUtils;
-import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 
 public class TwitterStateless {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -42,46 +39,23 @@ public class TwitterStateless {
         final JavaPairRDD<String, String> languageMap = LanguageMapUtils
                 .buildLanguageMap(languageMapLines);
 
-        /*
-        // Grab the different languages.
-        JavaDStream<String> languages = stream.flatMap(new FlatMapFunction<Status, String>() {
-            @Override
-            public Iterator<String> call(Status s) {
-                return Arrays.asList(s.getLang()).iterator();
-            }
-        });
+        // Get language codes from tweets.
+        JavaDStream<String> languages = stream
+                .flatMap(s -> Arrays.asList(s.getLang()).iterator());
 
-        JavaPairDStream<String, Integer> pair = languages
+        // Count the number of times a language code is present.
+        JavaPairDStream<String, Integer> languageRankStream = languages
                 .mapToPair(s -> new Tuple2<>(s, 1))
-                .reduceByKey((a, b) -> a + b);
-
-        // Use the full language name by leveraging the language map RDD.
-        JavaPairDStream<String, Integer> formattedPair = pair
-                .transformToPair(
-                        new Function<JavaPairRDD<String, Integer>, JavaPairRDD<String, Integer>>() {
-                            @Override
-                            public JavaPairRDD<String, Integer> call(JavaPairRDD<String, Integer> pairRDD) throws Exception {
-                                return pairRDD.join(languageMap); // This isn't right...
-                            }
-                        }
-                );
-
-        // Sort the pairs in decending order.
-        JavaPairDStream<Integer, String> swappedPair = formattedPair.mapToPair(Tuple2::swap); // We swap before.
-        JavaPairDStream<Integer, String> sortedPair = swappedPair
-                .transformToPair(
-                    new Function<JavaPairRDD<Integer, String>, JavaPairRDD<Integer, String>>() {
-                        @Override
-                        public JavaPairRDD<Integer, String> call(JavaPairRDD<Integer, String> pairRDD) throws Exception {
-                            return pairRDD.sortByKey(false);
-                        }
-                    }
-                );
-        JavaPairDStream<String, Integer> languageRankStream = sortedPair.mapToPair(Tuple2::swap); // We swap after.
+                .reduceByKey((a, b) -> a + b)
+                // Join language map.
+                .transformToPair(s -> s.join(languageMap))
+                .mapToPair(s -> s._2()) // We want the second tuple.
+                // Sort by decending order.
+                .transformToPair(s -> s.sortByKey(false))
+                .mapToPair(Tuple2::swap);
 
         // Output the top ten language pairs.
         languageRankStream.print(10);
-        */
 
         // Start the application and wait for termination signal
         jsc.start();

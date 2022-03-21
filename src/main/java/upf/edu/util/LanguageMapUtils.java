@@ -17,6 +17,12 @@ public class LanguageMapUtils {
         // We must further sanitise fields [1] and [2] to ensure no blank country codes.
         Tuple2 pair = null;
         if (fields[1].length() == 2 ) {
+            // Remove language dialects from output.
+            int cut = fields[2].indexOf(";");
+            if (cut != -1) {
+                fields[2] = fields[2].substring(0, cut);
+            }
+
             // Pair is valid; therefore, not null.
             pair = new Tuple2<String, String>(fields[1], fields[2]);
         }
