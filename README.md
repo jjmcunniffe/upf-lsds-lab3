@@ -13,8 +13,8 @@ This development toolchain is configured with IntelliJ IDEA in mind. You will ne
 ## Usage
 1. To execute "Twitter Streaming Example" task, run `job_twitterstreamingexample.sh`.
 2. To execute "Real-time Twitter Stateless Exercise" task, run `job_twitterstateless.sh`.
-3. ...
+3. To execute "Real-time Twitter with windows" task, run `job_twitterwithwindow.sh`.
 
 ## Contributers
 * Jonathan Cunniffe (249512)
-* Belal "Bill" Khalil (______)
+* Belal "Bill" Khalil (249036)
